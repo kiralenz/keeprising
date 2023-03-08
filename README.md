@@ -8,9 +8,14 @@ Or the conda environment yaml?
 
 ## Usage
 At the moment:
-1. run the dummy_data_creation notebook to reset the data to its original form and save it to the local file
+1. run the dummy_data_creation notebook to reset the data to its original form and save it to the local file 
 2. run the chart creation notebook to add the "latest" data and save it to the local file
 3. create the conda environment
 4. go to the folder where everything is stored (local)
-5. streamlit run keeprising.py
+5. `streamlit run keeprising.py`
 Voila. 
+
+## Todo
+* check if streamlit works -> adapt environment creation
+* expand app with plots
+* add feature to add latest data in streamlit (if possible) and save the latest feeding data to local files

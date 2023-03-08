@@ -5,7 +5,7 @@ import numpy as np
 import seaborn as sns
 
 # Variables
-PATH = ('/Users/admin/Documents/GitHub/keeprising/data/')
+PATH = ('/Users/kiralenz/Documents/keeprising/data/')
 
 # Loading data
 feedings = pd.read_parquet(PATH + 'feedings.parquet')
