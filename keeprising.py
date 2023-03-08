@@ -3,6 +3,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.ticker as ticker
 
 # Variables
 PATH = ('/Users/kiralenz/Documents/keeprising/data/')
@@ -16,6 +19,7 @@ st.title('Keep Rising')
 
 st.header('Another feeding')
 
+# TODO: Add field for input
 # Adding new feeding data
 date_today = '2022-12-20'
 temperature_today = 19
@@ -106,6 +110,7 @@ st.write(latest_starter_used)
 # baked_bread['baking_date'] = pd.to_datetime(baked_bread['baking_date'])
 # baked_bread.to_parquet(PATH + 'baked_bread.parquet')
 
+# TODO: functionalize
 # Utilized sourdough starter
 used_for_bread = baked_bread[['baking_date', 'used_starter']]
 used_for_bread.rename(columns={
@@ -119,6 +124,7 @@ old_dough.rename(columns={'feeding_date':'date'}, inplace=True)
 # assuming a use of 10g for the new starter and a loss of 10g
 old_dough['delta_starter'] = 90
 
+# TODO: functionalize
 # Leftover calculation
 left_over = pd.concat([used_for_bread, old_dough, recyled_dough], ignore_index=True)
 left_over['date'] = pd.to_datetime(left_over['date'])
@@ -142,9 +148,12 @@ left_over['total_dough'] = total_dough
 # KPIs
 
 st.header('KPIs')
+st.subheader('Your bread rating')
 st.write(baked_bread.sort_values(by='bread_rating', ascending=False)['bread_name'].head(3))
-st.write(len(baked_bread))
-st.write(feedings['bacteria_composition'].tail(1))
+st.subheader('Your bread count')
+st.write('You baked ' + str(len(baked_bread)) + ' breads.')
+st.subheader('Your starter')
+st.write('Your starter contains mainly microbes of type' + str(feedings['bacteria_composition'].tail(1).values))
 
 if left_over.iloc[-1, 1] > 200:
     action = ('Time to get creative! You have ' + str(left_over.iloc[-1, 1]) + 'g of starter leftover.')
@@ -157,48 +166,55 @@ st.write(action)
 
 # Plots
 # Bread
-baked_breads_per_month = sns.displot(
-    data=baked_bread.groupby(pd.Grouper(key="baking_date", freq="M"))[
+st.header("Plots")
+plot_baked_bread = baked_bread.groupby(pd.Grouper(key="baking_date", freq="M"))[
         "bread_rating"
-    ].mean(),
-    x="baking_date",
-    height=5,
-    aspect=2,
-).set(title='Baked breads per month');
-st.write(baked_breads_per_month)
+    ].mean().to_frame('avg_bread_rating')
+fig, ax = plt.subplots(figsize=(6, 5))
 
+plot_baked_bread.plot(kind='bar', ylabel='Average bread rating', legend=False, ax=ax)
 
-sns.set(rc={'figure.figsize':(15,5)})
-bread_rating = sns.lineplot(data=baked_bread, x='baking_date', y='bread_rating'
-).set(title='Bread rating');
-st.write(bread_rating)
+# Adapt the x tick labels
+ticklabels = plot_baked_bread.index
+ticklabels = [item.strftime('%m-%Y') for item in plot_baked_bread.index]
+ax.xaxis.set_major_formatter(ticker.FixedFormatter(ticklabels))
+plt.gcf().autofmt_xdate()
 
-
-# Feeding
-growth_dependence_from_temperature = sns.relplot(data=feedings, x="temperature", y="growth_rate_per_hour", kind="line", height=5, aspect=2).set(
-    title="Growth dependence from temperature"
-);
-st.write(growth_dependence_from_temperature)
-
-
-growth_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='growth_rate_per_hour', height=5, aspect=2).set(
-    title="Growth dependence from temperature"
-);
-st.write(growth_dependence_from_temperature2)
-
-
-bubblesize_dependence_from_temperature = sns.relplot(data=feedings, x='temperature', y='bubble_size', kind='line',  height=5, aspect=2).set(
-    title="Bubble size dependence from temperature"
-);
-st.write(bubblesize_dependence_from_temperature)
+plt.show()
 
 
 
-bubblesize_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='bubble_size', height=5, aspect=2).set(
-    title="Bubble size dependence from temperature"
-);
-st.write(bubblesize_dependence_from_temperature2)
+# sns.set(rc={'figure.figsize':(15,5)})
+# bread_rating = sns.lineplot(data=baked_bread, x='baking_date', y='bread_rating'
+# ).set(title='Bread rating');
+# st.write(bread_rating)
 
 
-bacteria_composition_plot = sns.catplot(data=feedings, x='bacteria_composition', y='growth_rate', kind='boxen');
-st.write(bacteria_composition_plot)
+# # Feeding
+# growth_dependence_from_temperature = sns.relplot(data=feedings, x="temperature", y="growth_rate_per_hour", kind="line", height=5, aspect=2).set(
+#     title="Growth dependence from temperature"
+# );
+# st.write(growth_dependence_from_temperature)
+
+
+# growth_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='growth_rate_per_hour', height=5, aspect=2).set(
+#     title="Growth dependence from temperature"
+# );
+# st.write(growth_dependence_from_temperature2)
+
+
+# bubblesize_dependence_from_temperature = sns.relplot(data=feedings, x='temperature', y='bubble_size', kind='line',  height=5, aspect=2).set(
+#     title="Bubble size dependence from temperature"
+# );
+# st.write(bubblesize_dependence_from_temperature)
+
+
+
+# bubblesize_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='bubble_size', height=5, aspect=2).set(
+#     title="Bubble size dependence from temperature"
+# );
+# st.write(bubblesize_dependence_from_temperature2)
+
+
+# bacteria_composition_plot = sns.catplot(data=feedings, x='bacteria_composition', y='growth_rate', kind='boxen');
+# st.write(bacteria_composition_plot)
