@@ -165,56 +165,40 @@ st.write(action)
 
 
 # Plots
-# Bread
+# 1) Bread
 st.header("Plots")
 plot_baked_bread = baked_bread.groupby(pd.Grouper(key="baking_date", freq="M"))[
         "bread_rating"
     ].mean().to_frame('avg_bread_rating')
 fig, ax = plt.subplots(figsize=(6, 5))
-
 plot_baked_bread.plot(kind='bar', ylabel='Average bread rating', legend=False, ax=ax)
-
 # Adapt the x tick labels
 ticklabels = plot_baked_bread.index
 ticklabels = [item.strftime('%m-%Y') for item in plot_baked_bread.index]
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(ticklabels))
 plt.gcf().autofmt_xdate()
-
-plt.show()
-
-
-
-# sns.set(rc={'figure.figsize':(15,5)})
-# bread_rating = sns.lineplot(data=baked_bread, x='baking_date', y='bread_rating'
-# ).set(title='Bread rating');
-# st.write(bread_rating)
+# plot in streamlit
+st.pyplot(fig)
 
 
-# # Feeding
-# growth_dependence_from_temperature = sns.relplot(data=feedings, x="temperature", y="growth_rate_per_hour", kind="line", height=5, aspect=2).set(
-#     title="Growth dependence from temperature"
-# );
-# st.write(growth_dependence_from_temperature)
-
-
-# growth_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='growth_rate_per_hour', height=5, aspect=2).set(
-#     title="Growth dependence from temperature"
-# );
-# st.write(growth_dependence_from_temperature2)
+# 2) Feeding
+growth_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='growth_rate_per_hour', height=5, aspect=2).set(
+    title="Growth dependence from temperature"
+);
+st.pyplot(growth_dependence_from_temperature2)
 
 
 # bubblesize_dependence_from_temperature = sns.relplot(data=feedings, x='temperature', y='bubble_size', kind='line',  height=5, aspect=2).set(
 #     title="Bubble size dependence from temperature"
 # );
-# st.write(bubblesize_dependence_from_temperature)
+# st.pyplot(bubblesize_dependence_from_temperature)
 
 
-
-# bubblesize_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='bubble_size', height=5, aspect=2).set(
-#     title="Bubble size dependence from temperature"
-# );
-# st.write(bubblesize_dependence_from_temperature2)
+bubblesize_dependence_from_temperature2 = sns.lmplot(data=feedings, x='temperature', y='bubble_size', height=5, aspect=2).set(
+    title="Bubble size dependence from temperature"
+);
+st.pyplot(bubblesize_dependence_from_temperature2)
 
 
 # bacteria_composition_plot = sns.catplot(data=feedings, x='bacteria_composition', y='growth_rate', kind='boxen');
-# st.write(bacteria_composition_plot)
+# st.pyplot(bacteria_composition_plot)
