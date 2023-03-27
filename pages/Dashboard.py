@@ -9,7 +9,6 @@ import matplotlib.ticker as ticker
 import json
 import openai
 import base64
-from ../utils.py import add_bg
 
 # getting keys
 with open('config/config.json') as f:
