@@ -16,14 +16,13 @@ Voila.
 5. If you need to reset the data because you messed things up, I fear you will have to reset to dummy data by running the notebook `dummy_data_creation.ipynb`.
 
 ## Todo
-* split script into a feeding activity, a baking activity and a dashboard activity + help page
-* transform dummy_data_creation in a python script
+* fix recycling method
 * expand app with plots
-    * find out why plot is not shown
-* add feature to add latest data in streamlit (if possible) and save the latest feeding data to local files
 * store path in a external notebook/file to be called
 * functionalize the script
 * improve the bread loaf background and store it in a gist
 * store the path in the config.json
 * create a utils.py and store all the tiny functions in there
 * remove unnecessary libraries from the scripts
+* eventually install sketch to condaenv
+* transform dummy_data_creation in a python script
