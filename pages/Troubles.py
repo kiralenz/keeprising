@@ -13,7 +13,7 @@ import base64
 # getting keys
 with open('config/config.json') as f:
     keys = json.load(f)
-openai_api_key = keys['openai_api_key']
+PATH = keys['path']
 openai_organization = keys['openai_organization']
 openai.organization = openai_organization
 openai.api_key = openai_api_key
@@ -76,6 +76,7 @@ response = openai.ChatCompletion.create(
     ]
 )
 answer = response['choices'][0]['message']['content']
+
 # helper code which is not necessary anymore
 # response = 'Answer to question: ' + question
 # answer=response

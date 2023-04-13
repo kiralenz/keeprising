@@ -15,3 +15,7 @@ def add_bg(image_file):
     """,
     unsafe_allow_html=True
     )
+    
+def addone(number):
+    new_number = number + 1
+    return new_number

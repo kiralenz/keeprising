@@ -7,30 +7,18 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 import json
-import openai
+# import openai
 import base64
 
-# getting keys
+# getting variables from config.json
 with open('config/config.json') as f:
     keys = json.load(f)
-openai_api_key = keys['openai_api_key']
-openai_organization = keys['openai_organization']
-openai.organization = openai_organization
-openai.api_key = openai_api_key
-openai.Model.list()
+PATH = keys['path']
 
-# Variables
-PATH = ('/Users/kiralenz/Documents/keeprising/data/')
-
-# Loading data
-feedings = pd.read_parquet(PATH + 'feedings.parquet')
-baked_bread = pd.read_parquet(PATH + 'baked_bread.parquet')
-recyled_dough = pd.read_parquet(PATH + 'recycled_dough.parquet')
-feedings_processed = pd.read_parquet(PATH + 'feedings_processed.parquet')
 
 # Functions
 # better read functions from utils, but not yet working
-def add_bg_from_local(image_file):
+def add_bg(image_file):
     with open(image_file, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
     st.markdown(
@@ -45,20 +33,39 @@ def add_bg_from_local(image_file):
     unsafe_allow_html=True
     )
 
+# merging historical activities with latest activity data
+def add_latest_activity(df_hist, df_new, date_column):
+    # Fixing dtypes
+    df_hist[date_column] = df_hist[date_column].astype(str)
+    df_new[date_column] = df_new[date_column].astype(str)
+    
+    # Df merging of historical feedings and latest feeding
+    df = pd.concat([df_hist, df_new], ignore_index=True)
+    df[date_column] = pd.to_datetime(df[date_column])
+    df[date_column] = df[date_column].dt.strftime('%Y-%m-%d')
+    
+    return df
+    
+# Loading data
+feedings = pd.read_parquet(PATH + 'feedings.parquet')
+baked_bread = pd.read_parquet(PATH + 'baked_bread.parquet')
+recycled_dough = pd.read_parquet(PATH + 'recycled_dough.parquet')
+
+
 # streamlit page
 st.set_page_config(page_title="Keeprising") 
-add_bg_from_local('bread_loaf.png')  
+add_bg('bread_loaf.png')  
 st.title('Keep Rising - Your baking')
 st.header('How was your baking?')
 
-# Baked breads
-# Adding new data
+
+# Adding new baking data - user input
 latest_baking_date = st.date_input('Baking date')
 latest_bread = st.text_input('Bread name')
 latest_rating = st.number_input('Rating - 0 to 10')
 starter_used = st.number_input('Starter used in g')
 
-
+# storing new data in a dataframe
 latest_bread = pd.DataFrame(data={
     'bread_name':latest_bread,
     'baking_date':latest_baking_date,
@@ -66,17 +73,35 @@ latest_bread = pd.DataFrame(data={
     'used_starter':starter_used
 }, index=[0])
 
-baked_bread['baking_date'] = baked_bread['baking_date'].astype(str)
-latest_bread['baking_date'] = latest_bread['baking_date'].astype(str)
-
-# Df merging 
-baked_bread = pd.concat([baked_bread, latest_bread], ignore_index=True)
-baked_bread['baking_date'] = pd.to_datetime(baked_bread['baking_date'])
-baked_bread['baking_date'] = baked_bread['baking_date'].dt.strftime('%Y-%m-%d')
+# merging the new data to historic data
+baked_bread = add_latest_activity(
+    df_hist=baked_bread, 
+    df_new=latest_bread, 
+    date_column='baking_date')
 
 # Saving data
 baked_bread.to_parquet(PATH + 'baked_bread.parquet')
 st.dataframe(baked_bread.tail(3))
+
+
+# Starter recycling
+st.header('Did you recycle?')
+recycling_bool = st.checkbox(label="Select here if you used leftover starter.", value=False)
+
+if recycling_bool:
+    latest_recycling_date = st.date_input('Recycling date')
+    
+    # storing new data in a dataframe
+    latest_recycling = pd.DataFrame(data={
+        'date':latest_recycling_date,
+        'recycling_happened':True
+    }, index=[0])
+    
+    # merging new to historic data
+    recycled_dough = add_latest_activity(
+    df_hist=recycled_dough, 
+    df_new=latest_recycling, 
+    date_column='date')
 
 
 # Processing
@@ -89,15 +114,14 @@ used_for_bread.rename(columns={
 }, inplace=True)
 used_for_bread['delta_starter'] = used_for_bread['delta_starter']*(-1)
 
-old_dough = feedings[['feeding_date']]
-old_dough.rename(columns={'feeding_date':'date'}, inplace=True)
+leftover_starter = feedings[['feeding_date']]
+leftover_starter.rename(columns={'feeding_date':'date'}, inplace=True)
 # assuming a use of 40g for the new starter and a loss of 10g
-old_dough['delta_starter'] = 55
-
+leftover_starter['delta_starter'] = 55
 
 # TODO: functionalize
 # Leftover calculation
-left_over = pd.concat([used_for_bread, old_dough, recyled_dough], ignore_index=True)
+left_over = pd.concat([used_for_bread, leftover_starter, recycled_dough], ignore_index=True)
 left_over['date'] = pd.to_datetime(left_over['date'])
 left_over.sort_values(by='date', inplace=True)
 left_over['recycling_happened'] = left_over['recycling_happened'].fillna(False)
