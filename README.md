@@ -16,7 +16,7 @@ Voila.
 5. If you need to reset the data because you messed things up, I fear you will have to reset to dummy data by running the notebook `dummy_data_creation.ipynb`.
 
 ## Todo
-* fix recycling method
+* modify process so that row is only added if a feeding or a baking has been done
 * expand app with plots
 * store path in a external notebook/file to be called
 * functionalize the script

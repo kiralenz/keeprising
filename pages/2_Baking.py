@@ -2,13 +2,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import matplotlib.ticker as ticker
-import json
-# import openai
 import base64
+import json
 
 # getting variables from config.json
 with open('config/config.json') as f:
@@ -35,6 +30,7 @@ def add_bg(image_file):
 
 # merging historical activities with latest activity data
 def add_latest_activity(df_hist, df_new, date_column):
+    
     # Fixing dtypes
     df_hist[date_column] = df_hist[date_column].astype(str)
     df_new[date_column] = df_new[date_column].astype(str)
@@ -45,6 +41,55 @@ def add_latest_activity(df_hist, df_new, date_column):
     df[date_column] = df[date_column].dt.strftime('%Y-%m-%d')
     
     return df
+
+# Utilized sourdough starter for baking
+def df_starter_for_baking(df):
+    
+    used_for_bread = df[['baking_date', 'used_starter']]
+    
+    # to be easily mergeable in the end with the other dfs to be generated
+    used_for_bread.rename(columns={
+        'baking_date':'date',
+        'used_starter':'delta_starter'
+    }, inplace=True)
+    
+    # to make it a negative value
+    used_for_bread['delta_starter'] = used_for_bread['delta_starter']*(-1)
+    
+    return used_for_bread
+
+# Starter which is leftover during feeding
+def df_feeding_leftovers(df):
+    
+    leftover_starter = df[['feeding_date']]
+    leftover_starter.rename(columns={'feeding_date':'date'}, inplace=True)
+    
+    # assuming a use of 40g for the new starter and a loss of 10g
+    leftover_starter['delta_starter'] = 55
+    
+    return leftover_starter
+
+# Total leftover calculation
+def leftover_starter(baked_bread, feedings, recycled_dough):
+    # calling other functions
+    used_for_bread = df_starter_for_baking(df=baked_bread)
+    leftover_starter = df_feeding_leftovers(df=feedings)
+    
+    # connecting the three sources for data impacting leftover volume
+    left_over = pd.concat([
+        used_for_bread, 
+        leftover_starter, 
+        recycled_dough
+    ], ignore_index=True)
+    
+    # df formatting
+    left_over['date'] = pd.to_datetime(left_over['date'])
+    left_over.sort_values(by='date', inplace=True)
+    left_over['recycling_happened'] = left_over['recycling_happened'].fillna(False)
+    left_over.reset_index(inplace=True, drop=True)
+    
+    return left_over
+    
     
 # Loading data
 feedings = pd.read_parquet(PATH + 'feedings.parquet')
@@ -99,52 +144,20 @@ if recycling_bool:
     
     # merging new to historic data
     recycled_dough = add_latest_activity(
-    df_hist=recycled_dough, 
-    df_new=latest_recycling, 
-    date_column='date')
+        df_hist=recycled_dough, 
+        df_new=latest_recycling, 
+        date_column='date'
+    )
 
 
 # Processing
-# TODO: functionalize
-# Utilized sourdough starter
-used_for_bread = baked_bread[['baking_date', 'used_starter']]
-used_for_bread.rename(columns={
-    'baking_date':'date',
-    'used_starter':'delta_starter'
-}, inplace=True)
-used_for_bread['delta_starter'] = used_for_bread['delta_starter']*(-1)
+left_over = leftover_starter(
+    baked_bread=baked_bread, 
+    feedings=feedings, 
+    recycled_dough=recycled_dough
+)
+left_over.to_parquet(PATH + 'left_over.parquet')
 
-leftover_starter = feedings[['feeding_date']]
-leftover_starter.rename(columns={'feeding_date':'date'}, inplace=True)
-# assuming a use of 40g for the new starter and a loss of 10g
-leftover_starter['delta_starter'] = 55
-
-# TODO: functionalize
-# Leftover calculation
-left_over = pd.concat([used_for_bread, leftover_starter, recycled_dough], ignore_index=True)
-left_over['date'] = pd.to_datetime(left_over['date'])
-left_over.sort_values(by='date', inplace=True)
-left_over['recycling_happened'] = left_over['recycling_happened'].fillna(False)
-left_over.reset_index(inplace=True, drop=True)
-
-# leftover dough calculation
-total_dough = []
-cumsum = 0
-for index, row in left_over.iterrows():
-    if row['recycling_happened'] == False:
-        cumsum = cumsum + row['delta_starter'] 
-        total_dough.append(cumsum)
-    else:
-        cumsum = 0
-        total_dough.append(cumsum)
-left_over['total_dough'] = total_dough
+    
 
 
-if left_over.iloc[-1, 1] > 200:
-    action = ('Time to get creative! You have ' + str(left_over.iloc[-1, 1]) + 'g of starter leftover.')
-else:
-    action = ('You have ' + str(left_over.iloc[-1, 1]) + 'g of starter leftover.')
-
-# Actions
-st.header("Your starter status")
-st.write(action)
