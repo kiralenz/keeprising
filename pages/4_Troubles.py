@@ -16,11 +16,10 @@ with open('config/config.json') as f:
 PATH = keys['path']
 openai_organization = keys['openai_organization']
 openai.organization = openai_organization
+openai_api_key = keys['openai_api_key']
 openai.api_key = openai_api_key
 openai.Model.list()
 
-# Variables
-PATH = ('/Users/kiralenz/Documents/keeprising/data/')
 
 # Functions
 # better read functions from utils, but not yet working
@@ -38,14 +37,31 @@ def add_bg(image_file):
     """,
     unsafe_allow_html=True
     )
+    
+# merging historical activities with latest activity data
+def add_latest_activity(df_hist, df_new, date_column):
+    
+    # Fixing dtypes
+    df_hist[date_column] = df_hist[date_column].astype(str)
+    df_new[date_column] = df_new[date_column].astype(str)
+    
+    # Df merging of historical feedings and latest feeding
+    df = pd.concat([df_hist, df_new], ignore_index=True)
+    df[date_column] = pd.to_datetime(df[date_column])
+    df[date_column] = df[date_column].dt.strftime('%Y-%m-%d')
+    
+    return df
+
 
 # Loading data
 notes_history = pd.read_parquet(PATH + 'notes_history.parquet')
+    
     
 # streamlit page
 st.set_page_config(page_title="Keeprising")
 add_bg('bread_loaf.png')  
 st.title('Keeprising - Here to help you')
+
 
 # Notes
 st.header("Your observations - Misstakes are there to learn")
@@ -57,14 +73,12 @@ latest_note = pd.DataFrame(data={
     'notes':latest_note,
 }, index=[0])
 
-latest_note['date'] = latest_note['date'].astype(str)
-notes_history['date'] = notes_history['date'].astype(str)
-notes_history = pd.concat([latest_note, notes_history], ignore_index=True)
-notes_history['date'] = pd.to_datetime(notes_history['date'])
-notes_history['date'] = notes_history['date'].dt.strftime('%Y-%m-%d')
+notes_history = add_latest_activity(df_hist=notes_history, df_new=latest_note, date_column='date')
 notes_history = notes_history.set_index('date')
+
 st.dataframe(notes_history)
-    
+
+
 # Help area
 st.header("Ask for help")
 question = st.text_input('Ask your question here')
@@ -76,9 +90,5 @@ response = openai.ChatCompletion.create(
     ]
 )
 answer = response['choices'][0]['message']['content']
-
-# helper code which is not necessary anymore
-# response = 'Answer to question: ' + question
-# answer=response
 
 st.write(answer)

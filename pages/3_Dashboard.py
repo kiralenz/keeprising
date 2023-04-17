@@ -7,20 +7,12 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 import json
-# import openai
 import base64
 
-# getting keys
-# with open('config/config.json') as f:
-#     keys = json.load(f)
-# openai_api_key = keys['openai_api_key']
-# openai_organization = keys['openai_organization']
-# openai.organization = openai_organization
-# openai.api_key = openai_api_key
-# openai.Model.list()
-
-# Variables
-PATH = ('/Users/kiralenz/Documents/keeprising/data/')
+# getting variables from config.json
+with open('config/config.json') as f:
+    keys = json.load(f)
+PATH = keys['path']
 
 # Functions
 # better read functions from utils, but not yet working
@@ -39,27 +31,59 @@ def add_bg(image_file):
     unsafe_allow_html=True
     )
 
+# leftover dough calculation for action display
+def leftover_action(df):
+    total_dough = []
+    cumsum = 0
+    for index, row in df.iterrows():
+        if row['recycling_happened'] == False:
+            cumsum = cumsum + row['delta_starter'] 
+            total_dough.append(cumsum)
+        else:
+            cumsum = 0
+            total_dough.append(cumsum)
+    df['total_dough'] = total_dough
+
+
+    if df.iloc[-1, 1] > 200:
+        action = ('Time to get creative! You have ' + str(df.iloc[-1, 1]) + 'g of starter leftover.')
+    else:
+        action = ('You have ' + str(df.iloc[-1, 1]) + 'g of starter leftover.')
+    
+    return action
+
 
 # Loading data
 feedings = pd.read_parquet(PATH + 'feedings.parquet')
 feedings_processed = pd.read_parquet(PATH + 'feedings_processed.parquet')
 baked_bread = pd.read_parquet(PATH + 'baked_bread.parquet')
+left_over = pd.read_parquet(PATH + 'left_over.parquet')
+
 
 # streamlit page
 st.set_page_config(page_title="Keeprising")
 add_bg('bread_loaf.png')  
-st.title('Keep Rising - Dashboards')
+st.title('Keep Rising - Monitoring')
 
 
 # KPIs
 st.header('KPIs')
-st.subheader('Your bread rating')
-st.write(baked_bread.sort_values(by='bread_rating', ascending=False)['bread_name'].head(3))
-st.subheader('Your bread count')
-st.write('You baked ' + str(len(baked_bread)) + ' breads.')
-st.subheader('Your starter')
-st.write('Your starter contains mainly microbes of type' + str(feedings_processed['bacteria_composition'].tail(1).values))
+# calculation of the activity
+action = leftover_action(df=left_over)
 
+col1, col2, col3, col4= st.columns(4)
+with col1:
+    st.subheader('Your bread rating')
+    st.write(baked_bread.sort_values(by='bread_rating', ascending=False)['bread_name'].head(3))
+with col2:
+    st.subheader('Your bread count')
+    st.write(len(baked_bread))
+with col3:
+    st.subheader('Microbe composition')
+    st.write(feedings_processed['bacteria_composition'].tail(1).values)
+with col4:
+    st.subheader('Starter volume status')
+    st.write(action)
 
 
 # Plots
