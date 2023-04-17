@@ -1,6 +1,19 @@
 import streamlit as st
 import base64
+import json
+import openai
 
+# getting keys
+with open('config/config.json') as f:
+    keys = json.load(f)
+PATH = keys['path']
+openai_organization = keys['openai_organization']
+openai.organization = openai_organization
+openai_api_key = keys['openai_api_key']
+openai.api_key = openai_api_key
+openai.Model.list()
+
+# streamlit page
 st.set_page_config(
     page_title="Hello",
 )

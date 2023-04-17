@@ -18,11 +18,7 @@ Voila.
 ## Todo
 * modify process so that row is only added if a feeding or a baking has been done
 * expand app with plots
-* store path in a external notebook/file to be called
-* functionalize the script
 * improve the bread loaf background and store it in a gist
-* store the path in the config.json
 * create a utils.py and store all the tiny functions in there
-* remove unnecessary libraries from the scripts
 * eventually install sketch to condaenv
 * transform dummy_data_creation in a python script
