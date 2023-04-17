@@ -62,6 +62,7 @@ left_over = pd.read_parquet(PATH + 'left_over.parquet')
 
 # streamlit page
 st.set_page_config(page_title="Keeprising")
+st.set_page_config(layout="wide")
 add_bg('bread_loaf.png')  
 st.title('Keep Rising - Monitoring')
 
