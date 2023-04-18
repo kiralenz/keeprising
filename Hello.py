@@ -15,7 +15,6 @@ openai.Model.list()
 
 
 # Functions
-# add bg
 def add_bg():
     st.markdown(
     f"""
@@ -29,9 +28,7 @@ def add_bg():
     unsafe_allow_html=True
     )
     
-
-
-def add_logo(height: int = 120):
+def add_logo(height):
     st.markdown(
         f"""
         <style>

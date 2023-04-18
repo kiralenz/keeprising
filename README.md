@@ -21,7 +21,7 @@ Voila.
 * improve the bread loaf background and store it in a gist
 * create a utils.py and store all the tiny functions in there
 * eventually install sketch to condaenv
+* update environment.yml
 * transform dummy_data_creation in a python script
-* add logo to all pages
 * add flour types to baking notebook (multiselect)
 * giving suggestions on breads based on bread rating and desired bread type
