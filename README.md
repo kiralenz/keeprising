@@ -29,4 +29,5 @@ Voila.
 * create a utils.py and store all the tiny functions in there -> find a way to use a module
 * in the beginning no config/config.json  was created -> maybe include a way to have a start page which asks the user to put in some credentials and store them automaticall
 * blackcellmagic was not installed via .yml file
-* PATH is not dynamic, so I had to change it, I created a data  folder
+* PATH is not dynamic, so I had to change it
+* pre-create the data  folder and add it without content to github
