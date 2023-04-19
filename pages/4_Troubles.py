@@ -74,11 +74,11 @@ notes_history = pd.read_parquet(PATH + 'notes_history.parquet')
 st.set_page_config(page_title="Keeprising")
 add_bg()  
 add_logo()
-st.title('Keeprising - Here to help you')
+st.title('Here to help you')
 
 
 # Notes
-st.header("Your observations - Misstakes are there to learn")
+st.header("Your observations")
 latest_note = st.text_input('Type your observation here')
 latest_date = st.date_input('Date')
 

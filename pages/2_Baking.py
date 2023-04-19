@@ -9,6 +9,11 @@ import json
 with open('config/config.json') as f:
     keys = json.load(f)
 PATH = keys['path']
+openai_organization = keys['openai_organization']
+openai.organization = openai_organization
+openai_api_key = keys['openai_api_key']
+openai.api_key = openai_api_key
+openai.Model.list()
 
 
 # Functions
@@ -116,6 +121,24 @@ add_bg()
 add_logo()
 st.title('Keep Rising - Your baking')
 st.header('How was your baking?')
+
+# TODO
+# add a checkbox if one did bake or want to bake and need some inspiration
+# continue either to GPT-powered inspiration section or to baking documentation
+
+# Inspiration area
+st.subheader("Get some inspiration")
+flour = st.text_input('What kind of flour do you want to use?')
+response = openai.ChatCompletion.create(
+  model="gpt-3.5-turbo",
+  messages=[
+        {"role": "system", "content": "You are a bakery educator."},
+        {"role": "user", "content": question},
+    ]
+)
+answer = response['choices'][0]['message']['content']
+
+st.write(answer)
 
 
 # Adding new baking data - user input
