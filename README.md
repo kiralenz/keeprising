@@ -22,8 +22,6 @@ Voila.
 * modify process so that row is only added if a feeding or a baking has been done
 * expand app with plots
 * update environment.yml
-* transform dummy_data_creation in a python script
-* add flour types to baking notebook (multiselect)
 * giving suggestions on breads based on bread rating and desired bread type
 * eventually install sketch to condaenv
 * create a utils.py and store all the tiny functions in there -> find a way to use a module

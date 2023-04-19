@@ -110,18 +110,19 @@ def leftover_starter(baked_bread, feedings, recycled_dough):
     return left_over
 
 # the function to show the tool which gives inspiration    
-def show_inspiration():
+def give_inspiration():
+    st.header("Give me some inspiration")
     flour = st.text_input('What kind of flour do you want to use?')
-    request = "I would like to bake a bread with " + flour + "flour. Can you give me a suggestion for a specific bread?"
+    request = "I would like to bake a bread with " + flour + " flour. Can you give me a suggestion for a specific bread?"
     response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
-      messages=[
+        model="gpt-3.5-turbo",
+        messages=[
             {"role": "system", "content": "You are a professional baker."},
             {"role": "user", "content": request},
         ]
     )
     answer = response['choices'][0]['message']['content']
-    return answer
+    st.write(answer)
 
 def add_vertical_space(num_lines: int = 1):
     """Add vertical space to your Streamlit app."""
@@ -141,8 +142,9 @@ add_bg()
 add_logo(160)
 st.title('How was your baking?')
 
-col1, col2 = st.columns(2)
-
+# two columns for two separate features
+col1, col2 = st.columns(spec=[3,2], gap='large')
+# feature 1: documentation of the latest baking
 with col1:
     st.header("A nice baking session")
     # Adding new baking data - user input
@@ -155,7 +157,6 @@ with col1:
         ['Wheat', 'Spelt', 'Rye', 'Oat', 'Semoline', 'Emmer flour', 'Kamut flour'], default=['Wheat'])
     # adding the resulting list to a list to make it one row in the created dataframe
     latest_flour = [latest_flour]
-
 
     # storing new data in a dataframe
     latest_bread = pd.DataFrame(data={
@@ -174,23 +175,13 @@ with col1:
 
     # Saving data
     baked_bread.to_parquet(PATH + 'baked_bread.parquet')
+    baked_bread.to_csv(PATH + 'baked_bread.csv')
     st.dataframe(baked_bread.tail(3))
 
-# WIP    
+# feature 2: asking for inspiration if the user has not baked yet    
 with col2:
-    st.header("Give me some inspiration")
-    flour = st.text_input('What kind of flour do you want to use?')
-    request = "I would like to bake a bread with " + flour + " flour. Can you give me a suggestion for a specific bread?"
-    st.write(request)
-        # response = openai.ChatCompletion.create(
-        #   model="gpt-3.5-turbo",
-        #   messages=[
-        #         {"role": "system", "content": "You are a professional baker."},
-        #         {"role": "user", "content": request},
-        #     ]
-        # )
-        # answer = response['choices'][0]['message']['content']
-        # st.write(answer)
+    give_inspiration()
+
 
 
 # Starter recycling
