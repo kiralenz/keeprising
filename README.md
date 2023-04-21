@@ -26,7 +26,14 @@ Voila.
 https://excalidraw.com/#json=UqKFHzmNI6mqr-aLomFEF,xwNEXAi01t4B47XI6ZnQ9g
 * eventually install sketch to condaenv
 * create a utils.py and store all the tiny functions in there -> find a way to use a module
+Feedback M
 * in the beginning no config/config.json  was created -> maybe include a way to have a start page which asks the user to put in some credentials and store them automaticall
 * blackcellmagic was not installed via .yml file
 * PATH is not dynamic, so I had to change it
 * pre-create the data  folder and add it without content to github -> wip
+Feedback M
+* why is there a conversion to string and then back to_datetime  in your add_latest_activity  function?
+* in the bacteria_column  function, I think it would be better to use pandas binning function pd.cut  instead of nested np.where
+* growth_rate_cols  maybe there should be a condition of when the denominator is 0, you’d get Inf , maybe you don’t wanna get that, but rather just zero
+* Ian always suggest me to use os.path.join  instead of +  when concatenating paths, it’s more dynamic and less prone to errors
+* Also, you overwrite some parquet files, right? Based on the readme description in point 5. Maybe creating raw data, that one mustn’t modify would be nice
