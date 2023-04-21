@@ -23,6 +23,7 @@ Voila.
 * expand app with plots
 * update environment.yml
 * giving suggestions on breads based on bread rating and desired bread type
+https://excalidraw.com/#json=UqKFHzmNI6mqr-aLomFEF,xwNEXAi01t4B47XI6ZnQ9g
 * eventually install sketch to condaenv
 * create a utils.py and store all the tiny functions in there -> find a way to use a module
 * in the beginning no config/config.json  was created -> maybe include a way to have a start page which asks the user to put in some credentials and store them automaticall
