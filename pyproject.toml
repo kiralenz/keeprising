@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "keeprising"
+version = "0.1.0"
+description = "A bread app"
+authors = ["kiralenz <kira.lenz@contiamo.com>"]
+readme = "README.md"
+packages = [
+    {include = "common", from = "."},
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai = "^1.13.3"
+matplotlib = "^3.8.3"
+pandas = "^2.2.1"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+blackcellmagic = "^0.0.3"
+ipykernel = "^6.29.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
