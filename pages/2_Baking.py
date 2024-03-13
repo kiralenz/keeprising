@@ -4,28 +4,47 @@ import pandas as pd
 import numpy as np
 import base64
 import json
+import openai
 
 # getting variables from config.json
 with open('config/config.json') as f:
     keys = json.load(f)
 PATH = keys['path']
+openai_organization = keys['openai_organization']
+openai.organization = openai_organization
+openai_api_key = keys['openai_api_key']
+openai.api_key = openai_api_key
+openai.Model.list()
 
 
 # Functions
 # better read functions from utils, but not yet working
-def add_bg(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
+def add_bg():
     st.markdown(
     f"""
     <style>
     .stApp {{
-        background-image: url(data:image/{"png"};base64,{encoded_string.decode()});
+        background-image: url(https://gist.githubusercontent.com/kiralenz/8fa216a5ab87e92944129da83d84dd5b/raw/806c89b90ee9c6eaf75f833eb9482c9cbca7dec1/bread_loaf.svg);
         background-size: cover
     }}
     </style>
     """,
     unsafe_allow_html=True
+    )
+    
+def add_logo(height):
+    st.markdown(
+        f"""
+        <style>
+            [data-testid="stSidebarNav"] {{
+                background-image: url(https://gist.githubusercontent.com/kiralenz/16203a45856cfb596741f24f85e82fbe/raw/c9d93e3336730e77132d40df4eb8d758471bcfd8/keeprising_logo.svg);
+                background-repeat: no-repeat;
+                padding-top: {height - 40}px;
+                background-position: 20px 20px;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
 # merging historical activities with latest activity data
@@ -89,6 +108,26 @@ def leftover_starter(baked_bread, feedings, recycled_dough):
     left_over.reset_index(inplace=True, drop=True)
     
     return left_over
+
+# the function to show the tool which gives inspiration    
+def give_inspiration():
+    st.header("Give me some inspiration")
+    flour = st.text_input('What kind of flour do you want to use?')
+    request = "I would like to bake a bread with " + flour + " flour. Can you give me a suggestion for a specific bread?"
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a professional baker."},
+            {"role": "user", "content": request},
+        ]
+    )
+    answer = response['choices'][0]['message']['content']
+    st.write(answer)
+
+def add_vertical_space(num_lines: int = 1):
+    """Add vertical space to your Streamlit app."""
+    for _ in range(num_lines):
+        st.write("")
     
     
 # Loading data
@@ -98,35 +137,51 @@ recycled_dough = pd.read_parquet(PATH + 'recycled_dough.parquet')
 
 
 # streamlit page
-st.set_page_config(page_title="Keeprising") 
-add_bg('bread_loaf.png')  
-st.title('Keep Rising - Your baking')
-st.header('How was your baking?')
+st.set_page_config(page_title="Keeprising", layout="wide")
+add_bg()  
+add_logo(160)
+st.title('How was your baking?')
 
+# two columns for two separate features
+col1, col2 = st.columns(spec=[3,2], gap='large')
+# feature 1: documentation of the latest baking
+with col1:
+    st.header("A nice baking session")
+    # Adding new baking data - user input
+    latest_baking_date = st.date_input('Baking date')
+    latest_bread = st.text_input('Bread name')
+    latest_rating = st.number_input('Rating - 0 to 10')
+    starter_used = st.number_input('Starter used in g')
+    latest_flour = st.multiselect(
+        'Used flours',
+        ['Wheat', 'Spelt', 'Rye', 'Oat', 'Semoline', 'Emmer flour', 'Kamut flour'], default=['Wheat'])
+    # adding the resulting list to a list to make it one row in the created dataframe
+    latest_flour = [latest_flour]
 
-# Adding new baking data - user input
-latest_baking_date = st.date_input('Baking date')
-latest_bread = st.text_input('Bread name')
-latest_rating = st.number_input('Rating - 0 to 10')
-starter_used = st.number_input('Starter used in g')
+    # storing new data in a dataframe
+    latest_bread = pd.DataFrame(data={
+        'bread_name':latest_bread,
+        'baking_date':latest_baking_date,
+        'bread_rating':latest_rating,
+        'used_starter':starter_used,
+        'flour_type':latest_flour
+    }, index=[0])
 
-# storing new data in a dataframe
-latest_bread = pd.DataFrame(data={
-    'bread_name':latest_bread,
-    'baking_date':latest_baking_date,
-    'bread_rating':latest_rating,
-    'used_starter':starter_used
-}, index=[0])
+    # merging the new data to historic data
+    baked_bread = add_latest_activity(
+        df_hist=baked_bread, 
+        df_new=latest_bread, 
+        date_column='baking_date')
 
-# merging the new data to historic data
-baked_bread = add_latest_activity(
-    df_hist=baked_bread, 
-    df_new=latest_bread, 
-    date_column='baking_date')
+    # Saving data
+    baked_bread.to_parquet(PATH + 'baked_bread.parquet')
+    baked_bread.to_csv(PATH + 'baked_bread.csv')
+    st.dataframe(baked_bread.tail(3))
 
-# Saving data
-baked_bread.to_parquet(PATH + 'baked_bread.parquet')
-st.dataframe(baked_bread.tail(3))
+# feature 2: asking for inspiration if the user has not baked yet    
+with col2:
+    give_inspiration()
+
 
 
 # Starter recycling
@@ -135,13 +190,13 @@ recycling_bool = st.checkbox(label="Select here if you used leftover starter.", 
 
 if recycling_bool:
     latest_recycling_date = st.date_input('Recycling date')
-    
+
     # storing new data in a dataframe
     latest_recycling = pd.DataFrame(data={
         'date':latest_recycling_date,
         'recycling_happened':True
     }, index=[0])
-    
+
     # merging new to historic data
     recycled_dough = add_latest_activity(
         df_hist=recycled_dough, 

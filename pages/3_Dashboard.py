@@ -16,19 +16,32 @@ PATH = keys['path']
 
 # Functions
 # better read functions from utils, but not yet working
-def add_bg(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
+def add_bg():
     st.markdown(
     f"""
     <style>
     .stApp {{
-        background-image: url(data:image/{"png"};base64,{encoded_string.decode()});
+        background-image: url(https://gist.githubusercontent.com/kiralenz/8fa216a5ab87e92944129da83d84dd5b/raw/806c89b90ee9c6eaf75f833eb9482c9cbca7dec1/bread_loaf.svg);
         background-size: cover
     }}
     </style>
     """,
     unsafe_allow_html=True
+    )
+    
+def add_logo(height):
+    st.markdown(
+        f"""
+        <style>
+            [data-testid="stSidebarNav"] {{
+                background-image: url(https://gist.githubusercontent.com/kiralenz/16203a45856cfb596741f24f85e82fbe/raw/c9d93e3336730e77132d40df4eb8d758471bcfd8/keeprising_logo.svg);
+                background-repeat: no-repeat;
+                padding-top: {height - 40}px;
+                background-position: 20px 20px;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
 # leftover dough calculation for action display
@@ -61,8 +74,9 @@ left_over = pd.read_parquet(PATH + 'left_over.parquet')
 
 
 # streamlit page
-st.set_page_config(page_title="Keeprising")
-add_bg('bread_loaf.png')  
+st.set_page_config(page_title="Keeprising", layout="wide")
+add_bg()
+add_logo(160)
 st.title('Keep Rising - Monitoring')
 
 
