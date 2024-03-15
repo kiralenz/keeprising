@@ -17,6 +17,7 @@ pandas = "^2.2.1"
 python-dotenv = "^1.0.1"
 fastapi = "^0.110.0"
 uvicorn = "^0.28.0"
+gradio = "^4.21.0"
 
 [tool.poetry.group.dev.dependencies]
 blackcellmagic = "^0.0.3"
