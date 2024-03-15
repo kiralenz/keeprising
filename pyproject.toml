@@ -15,6 +15,8 @@ openai = "^1.13.3"
 matplotlib = "^3.8.3"
 pandas = "^2.2.1"
 python-dotenv = "^1.0.1"
+fastapi = "^0.110.0"
+uvicorn = "^0.28.0"
 
 [tool.poetry.group.dev.dependencies]
 blackcellmagic = "^0.0.3"
