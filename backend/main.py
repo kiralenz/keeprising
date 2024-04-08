@@ -14,7 +14,7 @@ load_dotenv()
 # Local:
 from common.config import chatgpt_35_turbo
 from common.prompts import system_prompt 
-from common.generate import generate_response
+from common.llm import generate_response
 
 model = chatgpt_35_turbo['name']
 
@@ -27,5 +27,6 @@ class Question(BaseModel):
 def ask_question(question: Question):
     answer = generate_response(system_prompt=system_prompt, user_prompt=question.question, model=model)
     return {"question": question.question, "answer": answer}
+
 
 

@@ -879,6 +879,23 @@ uvicorn = ">=0.14.0"
 oauth = ["authlib", "itsdangerous"]
 
 [[package]]
+name = "gradio-calendar"
+version = "0.0.4"
+description = "Gradio component for selecting dates with a calendar 📆"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "gradio_calendar-0.0.4-py3-none-any.whl", hash = "sha256:32f738ea94ed4dea1e4069a117d907fc3e8a2757fb2f4b0ce67a801f434928df"},
+    {file = "gradio_calendar-0.0.4.tar.gz", hash = "sha256:e4ea93cc7f6284bb8e547bb34d891776f1f0bebd320eae80bd644c0cd30694ce"},
+]
+
+[package.dependencies]
+gradio = ">=4.0,<5.0"
+
+[package.extras]
+dev = ["build", "twine"]
+
+[[package]]
 name = "gradio-client"
 version = "0.12.0"
 description = "Python library for easily interacting with trained machine learning models"
@@ -3534,4 +3551,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a1bf9b9abe2af72edffe575a3d33600cd9f2bead2b4d2bb1953faf0347b00c46"
+content-hash = "e2d74f41d69970e7334def0b11ddfa8518b25395a5deefff45714941eaea6bed"

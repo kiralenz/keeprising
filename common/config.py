@@ -17,6 +17,7 @@ chatgpt_4_turbo = {"name": "gpt-4-turbo-preview"}
 # (Use pathlib as os.getcwd() changes when using jupyter notebooks)
 config_path = pathlib.Path(__file__).parent.resolve()
 root_path = os.path.join(config_path, "..")
+data_path = os.path.join(root_path, "data")
 
 # Define the path to the data directory within the backend directory:
 # data_path = pathlib.Path(backend_path, "data/").resolve()
