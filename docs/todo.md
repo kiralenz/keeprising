@@ -1,8 +1,12 @@
 [x] ~~.env file~~
 [x] ~~setup a backend script~~
-[] initial feature: ask questions
-[] setup frontend
-[] setup fastapi to connect backend and frontend
-[] add more functionalities
+[x] ~~initial feature: ask questions~~
+[x] ~~setup frontend~~
+[x] ~~setup fastapi to connect backend and frontend~~
+[] fix calendar functionality
+[] haystack
+[] use task to orchestrate the app startup
 [] drop environment yml
 [] update README
+[] store feedback
+[] logging
