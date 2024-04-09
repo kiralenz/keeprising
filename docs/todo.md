@@ -3,10 +3,10 @@
 [x] ~~initial feature: ask questions~~
 [x] ~~setup frontend~~
 [x] ~~setup fastapi to connect backend and frontend~~
-[] add more functionalities
+[] fix calendar functionality
+[] haystack
+[] use task to orchestrate the app startup
 [] drop environment yml
 [] update README
-[] use task to orchestrate the app startup
 [] store feedback
 [] logging
-[] haystack

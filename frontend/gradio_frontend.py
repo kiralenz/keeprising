@@ -35,7 +35,7 @@ with gr.Blocks() as demo:
             feedings_overview = gr.DataFrame(value=feedings_data, interactive=False)
             # Create the Calendar component for date input
             feeding_date = Calendar(type="datetime", label="Select a date", info="Click the calendar icon to bring up the calendar.")
-            feeding_date.change(fn=update_feedings, inputs=feeding_date, outputs=feedings_overview)
+            feeding_date.submit(fn=update_feedings, inputs=feeding_date, outputs=feedings_overview)
 
 
 

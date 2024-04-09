@@ -1,47 +1,71 @@
-import pandas as pd
-from datetime import datetime
+import json
+from typing import List, Union
 from pathlib import Path
-from pydantic import BaseModel, FilePath
-from typing import Union
-from common.config import data_path
+import pandas as pd
 
-class FeedingRecord(BaseModel):
-    feeding_dates: datetime
 
-def load_or_initialize_feedings(file_path: Path) -> pd.DataFrame:
+def read_feedings(file_path: Union[str, Path]) -> List[str]:
     """
-    Load the feeding data from a CSV file, or initialize a new DataFrame if the file does not exist.
+    Reads the feedings from a JSON file. If the file doesn't exist, returns an empty list.
 
-    :param file_path: The file path to load the data from.
-    :return: A DataFrame containing the feeding dates.
+    :param file_path: The path to the feedings JSON file.
+    :return: A list of feeding dates.
     """
-    if file_path.exists():
-        return pd.read_csv(file_path, parse_dates=["feeding_dates"])
-    return pd.DataFrame({"feeding_dates": pd.Series([], dtype="datetime64[ns]")})
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
 
-def add_feeding_date(feeding_date: datetime, file_path: Path) -> pd.DataFrame:
+def write_feedings(file_path: Union[str, Path], data: List[str]) -> None:
     """
-    Adds a feeding date to the DataFrame and saves it to a CSV file.
+    Writes the feedings to a JSON file.
 
+    :param file_path: The path to the feedings JSON file.
+    :param data: A list of feeding dates to write.
+    """
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(data, file, indent=4)
+
+def add_feeding_date(file_path: Union[str, Path], feeding_date: str) -> None:
+    """
+    Adds a feeding date to the feedings JSON file.
+
+    :param file_path: The path to the feedings JSON file.
     :param feeding_date: The feeding date to add.
-    :param file_path: The file path to save the data to.
-    :return: The updated DataFrame.
     """
-    feedings = load_or_initialize_feedings(file_path)
-    new_entry = pd.DataFrame({"feeding_dates": [feeding_date]})
-    updated_feedings = pd.concat([feedings, new_entry], ignore_index=True)
-    updated_feedings.to_csv(file_path, index=False)
-    return updated_feedings
+    data = read_feedings(file_path)
+    data.append(feeding_date)
+    write_feedings(file_path, data)
 
-def update_feedings(date_str: str, file_path: Union[Path, str] = data_path) -> pd.DataFrame:
-    """
-    Main function to update feedings with a new date.
 
-    :param date_str: The date string to add, in 'YYYY-MM-DD' format.
-    :param file_path: The data path where the feedings.csv is stored or should be saved.
-    :return: The updated DataFrame.
+def prepare_feedings_df(file_path: Union[str, Path]) -> pd.DataFrame:
     """
-    date_object = datetime.strptime(date_str, "%Y-%m-%d")
-    feedings_file_path = Path(file_path) / "feedings.csv"
-    updated_feedings = add_feeding_date(date_object, feedings_file_path)
-    return updated_feedings
+    Converts a list of feeding dates into a pandas DataFrame,
+    removes duplicates, sorts by date, and resets the index.
+
+    :param file_path: The file path to the feedings JSON file.
+    :return: A processed DataFrame of feeding dates.
+    """
+    # Read feeding dates from JSON file
+    feedings_list = read_feedings(file_path)
+
+    # Convert the list into a DataFrame
+    df = pd.DataFrame(feedings_list, columns=['date'])
+
+    # Remove duplicate entries
+    df.drop_duplicates(inplace=True)
+
+    # Sort the DataFrame by date
+    df.sort_values(by='date', inplace=True)
+
+    # Reset the index of the DataFrame
+    df.reset_index(drop=True, inplace=True)
+
+    return df
+
+# to do
+def update_feedings(feedings_df: pd.DataFrame, feeding_date: str) -> pd.DataFrame:
+    pass
+    # add feeding date
+    # get new df
