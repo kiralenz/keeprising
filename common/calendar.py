@@ -2,9 +2,10 @@ import json
 from typing import List, Union
 from pathlib import Path
 import pandas as pd
+from common.config import feedings_path
 
 
-def read_feedings(file_path: Union[str, Path]) -> List[str]:
+def read_feedings() -> List[str]:
     """
     Reads the feedings from a JSON file. If the file doesn't exist, returns an empty list.
 
@@ -12,34 +13,36 @@ def read_feedings(file_path: Union[str, Path]) -> List[str]:
     :return: A list of feeding dates.
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(feedings_path, 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         return []
 
-def write_feedings(file_path: Union[str, Path], data: List[str]) -> None:
+def write_feedings(data: List[str]) -> None:
     """
     Writes the feedings to a JSON file.
 
     :param file_path: The path to the feedings JSON file.
     :param data: A list of feeding dates to write.
     """
-    with open(file_path, 'w', encoding='utf-8') as file:
+    with open(feedings_path, 'w', encoding='utf-8') as file:
         json.dump(data, file, indent=4)
 
-def add_feeding_date(file_path: Union[str, Path], feeding_date: str) -> None:
+def add_feeding_date(feeding_date: str) -> None:
     """
     Adds a feeding date to the feedings JSON file.
 
     :param file_path: The path to the feedings JSON file.
     :param feeding_date: The feeding date to add.
     """
-    data = read_feedings(file_path)
+    data = read_feedings()
+    # converting date to string to store in JSON
+    feeding_date = feeding_date.strftime("%Y-%m-%d")
     data.append(feeding_date)
-    write_feedings(file_path, data)
+    write_feedings(data=data)
 
 
-def prepare_feedings_df(file_path: Union[str, Path]) -> pd.DataFrame:
+def prepare_feedings_into_df() -> pd.DataFrame:
     """
     Converts a list of feeding dates into a pandas DataFrame,
     removes duplicates, sorts by date, and resets the index.
@@ -48,7 +51,7 @@ def prepare_feedings_df(file_path: Union[str, Path]) -> pd.DataFrame:
     :return: A processed DataFrame of feeding dates.
     """
     # Read feeding dates from JSON file
-    feedings_list = read_feedings(file_path)
+    feedings_list = read_feedings()
 
     # Convert the list into a DataFrame
     df = pd.DataFrame(feedings_list, columns=['date'])
@@ -64,8 +67,18 @@ def prepare_feedings_df(file_path: Union[str, Path]) -> pd.DataFrame:
 
     return df
 
-# to do
-def update_feedings(feedings_df: pd.DataFrame, feeding_date: str) -> pd.DataFrame:
-    pass
-    # add feeding date
-    # get new df
+def update_feedings(feeding_date: str) -> pd.DataFrame:
+    """
+    Adds a feeding date to the JSON file and returns the updated list of feedings as a pandas DataFrame.
+
+    :param file_path: The file path to the feedings JSON file.
+    :param feeding_date: The feeding date to add, as a string.
+    :return: A pandas DataFrame containing the updated list of feedings, processed to remove duplicates,
+             sorted by date, and with the index reset.
+    """
+    # Add the feeding date to the JSON file
+    add_feeding_date(feeding_date=feeding_date)
+
+    # Prepare and return the updated feedings as a DataFrame
+    return prepare_feedings_into_df()
+
