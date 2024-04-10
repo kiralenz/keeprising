@@ -3,8 +3,8 @@ import requests
 from gradio_calendar import Calendar
 import datetime
 import gradio as gr
-from common.calendar import update_feedings
-from common.config import data_path
+from common.calendar import prepare_feedings_into_df, update_feedings
+from common.config import data_path, feedings_path
 from pathlib import Path
 import pandas as pd
 
@@ -15,7 +15,7 @@ def ask_backend(question):
     else:
         return f"Error: {response.status_code}, {response.text}"
     
-feedings_data = pd.read_csv(Path(data_path,"feedings.csv"))
+feedings_df = prepare_feedings_into_df()
 
 with gr.Blocks() as demo:
     gr.Markdown("# Welcome to keeprising!")
@@ -32,16 +32,13 @@ with gr.Blocks() as demo:
     with gr.Tab("Feedings"):
         gr.Markdown("## Feedings")        
         with gr.Row():
-            feedings_overview = gr.DataFrame(value=feedings_data, interactive=False)
+            feedings_overview = gr.DataFrame(value=feedings_df, interactive=False)
             # Create the Calendar component for date input
             feeding_date = Calendar(type="datetime", label="Select a date", info="Click the calendar icon to bring up the calendar.")
             feeding_date.submit(fn=update_feedings, inputs=feeding_date, outputs=feedings_overview)
 
 
-
-
 demo.launch()
 
-# interface = gr.Interface(fn=ask_backend, inputs="text", outputs="text")
 
 
